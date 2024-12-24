@@ -75,12 +75,14 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <ForcedIncludeFiles>stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <BuildStlModules>false</BuildStlModules>
-      <AdditionalIncludeDirectories>C:\Boost\boost_1_83_0\include\boost-1_83;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Boost\boost_1_83_0\include\boost-1_83;C:\openssl\x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <DelayLoadDLLs>advapi32.dll;crypt32.dll;dwmapi.dll;gdi32.dll;imm32.dll;ole32.dll;oleaut32.dll;opengl32.dll;shell32.dll;shlwapi.dll;user32.dll;winmm.dll;ws2_32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalLibraryDirectories>C:\openssl\x64\lib;C:\Boost\boost_1_83_0\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>C:\openssl\x64\lib\libcrypto.lib;C:\openssl\x64\lib\libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /I /D /Y "$(OutDir)$(TargetFileName)" "$(ProjectDir)App"</Command>
@@ -103,7 +105,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <ForcedIncludeFiles>stdafx.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <BuildStlModules>false</BuildStlModules>
-      <AdditionalIncludeDirectories>C:\Boost\boost_1_83_0\include\boost-1_83;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Boost\boost_1_83_0\include\boost-1_83;C:\openssl\x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -111,6 +113,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <DelayLoadDLLs>advapi32.dll;crypt32.dll;dwmapi.dll;gdi32.dll;imm32.dll;ole32.dll;oleaut32.dll;opengl32.dll;shell32.dll;shlwapi.dll;user32.dll;winmm.dll;ws2_32.dll;%(DelayLoadDLLs)</DelayLoadDLLs>
+      <AdditionalLibraryDirectories>C:\openssl\x64\lib;C:\Boost\boost_1_83_0\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>C:\openssl\x64\lib\libcrypto.lib;C:\openssl\x64\lib\libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /I /D /Y "$(OutDir)$(TargetFileName)" "$(ProjectDir)App"</Command>
@@ -330,6 +334,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\WSClient.hpp" />
+    <ClInclude Include="include\WSClientError.hpp" />
+    <ClInclude Include="src\WSClient\root_certificates.hpp" />
     <ClInclude Include="src\WSClient\WSClientDetail.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

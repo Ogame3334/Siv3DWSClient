@@ -1,9 +1,14 @@
 ﻿#include "WSClientDetail.hpp"
 
+#include "root_certificates.hpp"
+
 namespace ogm
 {
 	WSClient::WSClientDetail::WSClientDetail()
-		: m_ioContext(), m_resolver(m_ioContext), m_ws(m_ioContext) {}
+		: m_ioContext(), m_resolver(m_ioContext), m_ws(m_ioContext, m_ctx)
+	{
+		load_root_certificates(m_ctx);
+	}
 
 	void WSClient::WSClientDetail::onOpen(const std::function<void()> callback)
 	{
@@ -33,11 +38,32 @@ namespace ogm
 		try {
 			auto results = m_resolver.resolve(host.toUTF8(), std::to_string(port));
 
-			net::connect(m_ws.next_layer(), results);
+			auto ep = net::connect(m_ws.next_layer().next_layer(), results);
 
-			m_ws.handshake(host.toUTF8(), endpoint.toUTF8());
+			if (!SSL_set_tlsext_host_name(m_ws.next_layer().native_handle(), host.toUTF8().c_str())) {
+				throw beast::system_error(
+				beast::error_code(
+					static_cast<int>(::ERR_get_error()),
+					net::error::get_ssl_category()),
+				"Failed to set SNI Hostname");
+			}
 
-			m_task = Async([this, &host, &port] {this->run(); });
+			std::string hostWithPort = host.toUTF8() + ":" + std::to_string(ep.port());
+
+			m_ws.next_layer().handshake(ssl::stream_base::client);
+
+			m_ws.set_option(websocket::stream_base::decorator(
+				[](websocket::request_type& req) {
+					req.set(http::field::user_agent,
+						std::string(BOOST_BEAST_VERSION_STRING) +
+						" websocket-client-coro"
+					);
+				}
+			));
+
+			m_ws.handshake(hostWithPort, endpoint.toUTF8());
+
+			m_task = Async([this] {this->run(); });
 			return true;
 		}
 		catch (const beast::system_error& e) {
@@ -69,7 +95,13 @@ namespace ogm
 	{
 		if (getIsConnectionClosed()) return false;
 
-		m_ws.write(net::buffer(message.toUTF8()));
+		try {
+			m_ws.write(net::buffer(message.toUTF8()));
+		}
+		catch (const beast::system_error& e) {
+			m_onError(Unicode::Widen(e.code().message()));
+			return false;
+		}
 
 		return true;
 	}
@@ -80,11 +112,18 @@ namespace ogm
 	{
 		m_onOpen();
 
-		while (isContinue) {
-			m_ws.read(m_buffer);
-			std::string message = beast::buffers_to_string(m_buffer.data());
-			m_onMessage(Unicode::Widen(message));
-			m_buffer.clear();
+		try {
+			while (isContinue) {
+				Print << isContinue;
+				m_ws.read(m_buffer);
+				std::string message = beast::buffers_to_string(m_buffer.data());
+				m_onMessage(Unicode::Widen(message));
+				m_buffer.clear();
+			}
+		}
+		catch (const beast::system_error& e) {
+			m_onError(Unicode::Widen(e.code().message()));
+			return;
 		}
 		return;
 	}

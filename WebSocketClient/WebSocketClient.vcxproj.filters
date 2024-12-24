@@ -821,5 +821,8 @@
     <ClInclude Include="src\WSClient\WSClientDetail.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\WSClient\root_certificates.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
